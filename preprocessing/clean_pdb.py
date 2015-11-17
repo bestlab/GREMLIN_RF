@@ -21,6 +21,6 @@ for f_pdb in F_PDB:
     
     os.system(cmd)
     shutil.move(pdb+"_A.pdb","pdb/"+pdb+".pdb")
-    shutil.move(pdb+"_A.fasta","pdb/"+pdb+".fasta")
+    shutil.move(pdb+"_A.fasta","fasta/"+pdb+".fasta")
 
     print "Cleaned", f_pdb
