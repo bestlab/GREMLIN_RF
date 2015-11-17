@@ -1,3 +1,13 @@
-Work in progress for GREMLIN RF model.
+# GREMLIN Random Forests
+Enchancing coevolutionary results with random forests.
 
---- WORKING SPACE ---
+------------------------------------------------------------
+
+This protocol assumes you have ROSETTA and GREMLIN installed.
+
+### Preprocessing
+
+Place all input PDB files into [/preprocessing/pdb](/preprocessing/org_pdb).
+
+
+
