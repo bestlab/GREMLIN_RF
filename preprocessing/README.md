@@ -13,3 +13,6 @@ The original list of PDB's used in the PSI-COV dataset are included in this rele
     2cua 2hs1 2mhr 2phy 2tps 2vxn 3bor 3dqg 4qyx 5ptp
 
 They were downloaded from [http://www.rcsb.org](http://www.rcsb.org) on 11/17/2015.
+
+The files were cleaned with the script [clean_pdb.py](clean_pdb.py) using the clean scripts copied from ROSETTA `/rosetta/tools/protein_tools/scripts` folder. This creates a canonical set of proteins and sequence files in [/pdb](/pdb) and [/fasta][(/fasta).
+
