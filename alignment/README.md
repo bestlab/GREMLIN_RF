@@ -1,0 +1,1 @@
+Use hhblit to compute the alignments. The files will be read in from [fasta](fasta).

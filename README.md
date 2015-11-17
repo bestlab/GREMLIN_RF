@@ -3,11 +3,31 @@ Enchancing coevolutionary results with random forests.
 
 ------------------------------------------------------------
 
-This protocol assumes you have ROSETTA and GREMLIN installed.
+This protocol assumes you have HHBlits, ROSETTA, and GREMLIN installed.
 
 ### Preprocessing
 
-Place all input PDB files into [/preprocessing/pdb](/preprocessing/org_pdb).
+Follow the instructions in [/preprocessing/pdb](/preprocessing/org_pdb) to prepare a set of fasta and pdb files.
+
+### Alignment
+
+HHBlit
+
+### Coevolutionary analysis
+
+GREMLIN
+
+### Train Random Forests
+
+scikit-learn
+
+### Test structure files
+
+ROSETTA
+
+
+
+
 
 
 
