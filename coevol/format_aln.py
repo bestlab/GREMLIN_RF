@@ -10,5 +10,9 @@ for f in F_ALN:
     print "Loaded {} lines from {}".format(len(data), f)
     f_out = os.path.join("input_GREMLIN", os.path.basename(f))
 
-    with open(f,'w') as FOUT:
-        FOUT.write(''.join(data))
+    # Remove lower case letters in alignment
+    seq = [a for a in data if a.isupper()]
+    seq = ''.join(seq)
+
+    with open(f_out,'w') as FOUT:
+        FOUT.write(seq)
