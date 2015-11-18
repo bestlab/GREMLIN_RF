@@ -6,3 +6,6 @@
 
 # Python files
 *.pyc
+
+# Temp files
+coevol/input_GREMLIN/*
