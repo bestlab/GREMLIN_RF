@@ -1,0 +1,6 @@
+If you have a x86_64 Linux, you can use the pre-compiled version in this directory!
+
+1) download and install the MCR: http://www.mathworks.com/supportfiles/MCR_Runtime/R2012a/MCR_R2012a_glnxa64_installer.zip
+2) ./run_gremlin.sh ~/MATLAB_Compiler_Runtime/v717 1whzA.id90cov82.cut.msa 1whzA.id90cov82.cut.apc verbose 1
+
+the "~/MATLAB_Compiler_Runtime/v717" is the MCR from the above installation

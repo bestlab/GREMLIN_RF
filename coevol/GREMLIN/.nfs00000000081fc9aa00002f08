@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for pdb in 1jkx 1w0h 3bor 1k7j 1fvk 1beb 1pko 1im5 1f6b 1d1q 1c9o 1dsx 1jl1 1m4j 1atz 1gmi 2vxn 1m8a 1cjw 1qjp 1c52 1fqt 2tps 1r26 1atl 1dlw 1ctf 1tif 1gz2 1k7c 1tqh 1fx2 1lpy 1hh8 1vjk 1d0q 1bsg 1ku3 2mhr 1kqr 1cc8 1vp6 4qyx 1jbe 1vhu 1czn 1i1n 1ej0 1i5g 1a6m 1rw1 1xff 1xkr 1h2e 1ag6 1beh 1ktg 1kq6 1ny1 1dix 1k6k 1iib 1vmb 1wjx 1ihz 1t8k 1vfy 1aap 1jwq 1pch 1h4x 1gzc 1mk02cua 1hxn 1guu 1ne2 1a3a 1chd 1lo7 1cke 1jyh 1nrv 1svy 1avs 1bdo 1brf 1fl0 1h0p 1nps 1lm4 1fna 1p90 1gbs 1i58 1tqg 1dbx 1i1j 1h98 1jvw 1kw4 1fcy 1ek0 1gmx 1nb9 1cxy 1o1z 1jo8 1dmg 1kid 1dqg 1g9o 1fvg 1jos 1ryb 1eaz 1jfx 1roa 5ptp 1d4o 1aoe 1ej8 1i71 1aba 1j3a 1i4j 1jbk 1qf9 1smx 1mug 1g2r 1hfc 2arc 1iwd 1bkr 1tzv 1wkc 1whi 1htw 3dqg 1hdo 1a70 1jfu 2hs1 1xdz 1ql0 1c44 1fk5 2phy 1jo0
+
+do
+
+./run_gremlin.sh /usr/local/matlab64/  aln_150/${pdb}.fasta.chainA.txt.a3m.aln  ./${pdb}.gremlin.prediction.txt
+
+done
