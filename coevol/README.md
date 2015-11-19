@@ -6,4 +6,4 @@ GREMLIN, a MATLAB program, provides a stand-alone precompiled version, but this 
 
 With the container built, `run_GREMLIN.py` will compute the coevolutationary alignments in parallel. 
 
-When this is complete, run `collate_GREMLIN.py` to save and finish the APC-corrected results (an NxN matrix).
+When this is complete, run `collate_GREMLIN.py` to save and finish the APC-corrected results (an NxN matrix). The temporary directories `input_GREMLIN/` and `output_GREMLIN/` can be safely deleted unless the full (NxNx20x20) tensors are desired.
