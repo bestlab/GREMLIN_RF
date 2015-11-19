@@ -7,6 +7,7 @@ from sklearn.ensemble import ExtraTreesClassifier as Classifier
 import argparse
 from src.utils import APC_L2, generate_matrix_IDX
 from src.utils import generate_feature_vectors
+import src.utils as utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-w", "--kernel_window",type=int,required=True)
@@ -29,33 +30,11 @@ MP_CORES = 25
 
 #######################################################################
 
-# GREMLIN'S sequence encoding
-GREMLIN_seq_encoding = 'ARNDCQEGHILKMFPSTWYV'
-seq_encoding = dict(zip(GREMLIN_seq_encoding,range(20)))
-
-def load_GREMLIN_dataset(pdb):
-    f_GREMLIN = os.path.join("APC",pdb+'.gremlin')
-    return np.loadtxt(f_GREMLIN)
-
-def load_seq(pdb):
-    f_fasta = os.path.join("fasta",pdb+'.fasta')
-    with open(f_fasta) as FIN:
-        FIN.readline()
-        return FIN.readline().strip()
-
-def load_contact_map(pdb):
-    f_cmap = os.path.join("cmap",pdb+'.cmap')
-    return np.loadtxt(f_cmap).astype(int)
-
-def load_all_image_data(pdb):
-    return load_image_data(pdb,load_all=True)
-
 def load_image_data(pdb,load_all=False):
 
-    g   = load_GREMLIN_dataset(pdb)
-    fasta = load_seq(pdb)
-    seq = [seq_encoding[aa] for aa in fasta]
-    NATIVE = load_contact_map(pdb)
+    g   = utils.load_GREMLIN_dataset(pdb)
+    fasta,seq = utils.load_seq(pdb)
+    NATIVE = utils.load_contact_map(pdb)
 
     # Sanity checks    
     assert(len(seq) == g.shape[0])

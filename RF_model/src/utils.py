@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
-import itertools
-import h5py, os, glob, json
+import itertools, collections
+import os, glob, json
 
 #V = np.loadtxt("kernel_test/V.txt")
 
@@ -127,9 +127,9 @@ def load_dataset_lookup(clf_dir, bad_protein_list=[],debug_cutoff=10**10):
     Useful since the models are stored into separate files for the folds.
     '''
 
-    h5 = h5py.File("data/gremlin_data.h5",'r')
-    PDB = h5["PDB"].keys()[:debug_cutoff]
-    h5.close()
+    # Load the GREMLIN data files
+    F_GREMLIN = glob.glob("APC/*.gremlin")
+    PDB = np.array([os.path.basename(f).split('.')[0] for f in F_GREMLIN])
 
     # Remove a few bad proteins
     PDB = np.array([pdb for pdb in PDB if pdb
@@ -142,7 +142,7 @@ def load_dataset_lookup(clf_dir, bad_protein_list=[],debug_cutoff=10**10):
     f_clf_glob = os.path.join(clf_dir,"*.json")
     F_CLF_JSON = glob.glob(f_clf_glob)
 
-    PDB_CLF = {}
+    PDB_CLF = collections.OrderedDict()
 
     for f_json in F_CLF_JSON:
         with open(f_json) as FIN:
@@ -152,3 +152,30 @@ def load_dataset_lookup(clf_dir, bad_protein_list=[],debug_cutoff=10**10):
             PDB_CLF[pdb] = f_clf
 
     return PDB_CLF
+
+######################################################################
+
+# GREMLIN'S sequence encoding
+GREMLIN_seq_encoding = 'ARNDCQEGHILKMFPSTWYV'
+seq_encoding = dict(zip(GREMLIN_seq_encoding,range(20)))
+
+def load_GREMLIN_dataset(pdb):
+    f_GREMLIN = os.path.join("APC",pdb+'.gremlin')
+    return np.loadtxt(f_GREMLIN)
+
+def load_seq(pdb):
+    f_fasta = os.path.join("fasta",pdb+'.fasta')
+    with open(f_fasta) as FIN:
+        FIN.readline()
+        fasta = FIN.readline().strip()
+    seq = [seq_encoding[aa] for aa in fasta]
+    return fasta, seq
+
+def load_contact_map(pdb):
+    f_cmap = os.path.join("cmap",pdb+'.cmap')
+    return np.loadtxt(f_cmap).astype(int)
+
+def load_all_image_data(pdb):
+    return load_image_data(pdb,load_all=True)
+
+

@@ -10,3 +10,4 @@
 # Temp files
 coevol/input_GREMLIN/*
 coevol/output_GREMLIN/*
+RF_model/clf/*
