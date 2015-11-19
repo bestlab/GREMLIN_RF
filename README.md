@@ -15,7 +15,7 @@ HHBlit
 
 ### Coevolutionary analysis
 
-GREMLIN
+GREMLIN is packaged with this program. The entire GREMLIN directory is released under a Attribution-NonCommercial-ShareAlike 3.0 Unported licence.
 
 ### Train Random Forests
 
