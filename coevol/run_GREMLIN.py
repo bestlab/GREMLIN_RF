@@ -26,7 +26,7 @@ def run_aln(f_aln):
     }
 
     if os.path.exists(args["f_out"]):
-        return f_aln
+        return None
 
     cmd = (docker_start +
            "GREMLIN/run_gremlin.sh /opt/mcr/v81 input/{pdb}.aln {f_out}")
@@ -45,8 +45,8 @@ import multiprocessing
 P = multiprocessing.Pool()
 ITR = P.imap(run_aln, F_ALN)
 
-for f in ITR:
-    pass
-    #print "Completed", f
+for f_aln in ITR:
+    if f_aln is not None:
+        print "Completed", f_aln
 
 
