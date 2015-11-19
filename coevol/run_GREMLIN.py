@@ -15,7 +15,6 @@ docker_start = ("docker run --rm "
 
 def run_aln(f_aln):
     pdb = os.path.basename(f_aln).split('.')[0]
-    f_out = "{}/{}/{}.GREMLIN.txt".format(output_dir,pdb,pdb)
     os.system('mkdir -p {}/{}'.format(output_dir,pdb))
 
     args = {
@@ -23,17 +22,19 @@ def run_aln(f_aln):
         "input_dir"   : os.path.abspath("input_GREMLIN"),
         "output_dir"  : os.path.join(os.path.abspath("output_GREMLIN"),pdb),
         "gremlin_dir" : os.path.abspath("GREMLIN"),
+        "f_out"       : "output_GREMLIN/{pdb}/{pdb}.gremlin".format(pdb=pdb),
     }
 
-    if os.path.exists(f_out):
+    if os.path.exists(args["f_out"]):
         return f_aln
 
-    print "Starting", f_aln
     cmd = (docker_start +
-           "GREMLIN/run_gremlin.sh /opt/mcr/v81 input/{pdb}.aln output/{pdb}.gremlin")
+           "GREMLIN/run_gremlin.sh /opt/mcr/v81 input/{pdb}.aln {f_out}")
     cmd = cmd.format(**args)
 
+    print "Starting", f_aln
     os.system(cmd)
+    
     return f_aln
 
 
@@ -45,6 +46,7 @@ P = multiprocessing.Pool()
 ITR = P.imap(run_aln, F_ALN)
 
 for f in ITR:
-    print "Completed", f
+    pass
+    #print "Completed", f
 
 
