@@ -29,7 +29,7 @@ def run_aln(f_aln):
         return None
 
     cmd = (docker_start +
-           "GREMLIN/run_gremlin.sh /opt/mcr/v81 input/{pdb}.aln {f_out}")
+           "GREMLIN/run_gremlin.sh /opt/mcr/v81 input/{pdb}.aln output/{pdb}.gremlin")
     cmd = cmd.format(**args)
 
     print "Starting", f_aln
@@ -38,8 +38,8 @@ def run_aln(f_aln):
     return f_aln
 
 
-#import itertools
-#ITR = itertools.imap(run_aln, F_ALN)
+import itertools
+ITR = itertools.imap(run_aln, F_ALN)
 
 import multiprocessing
 P = multiprocessing.Pool()
