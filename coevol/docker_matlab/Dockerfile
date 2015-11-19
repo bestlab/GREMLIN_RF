@@ -22,8 +22,7 @@ RUN curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie"\
 RUN \
 	cd /mcr-install && \
 	wget -nv http://www.mathworks.com/supportfiles/MCR_Runtime/R2013a/MCR_R2013a_glnxa64_installer.zip && \
-	unzip MCR_R2013a_glnxa64_installer.zip
-RUN \
+	unzip MCR_R2013a_glnxa64_installer.zip && \
     cd /mcr-install && \
 	mkdir /opt/mcr && \
 	./install -inputFile matlab.txt && \
@@ -34,7 +33,11 @@ RUN \
 ENV JAVA_HOME /opt/jdk
 ENV PATH ${PATH}:${JAVA_HOME}/bin
 
-ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/mcr/v81/bin/glnxa64/:/opt/mcr/v81/runtime/glnxa64
+# ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/mcr/v81/bin/glnxa64/:/opt/mcr/v81/runtime/glnxa64
+
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/mcr/v81/runtime/glnxa64:/opt/mcr/v81/bin/glnxa64:/opt/mcr/v81/sys/os/glnxa64:/opt/mcr/v81/sys/java/jre/glnxa64/jre/lib/amd64/native_threads:/opt/mcr/v81/sys/java/jre/glnxa64/jre/lib/amd64/server:/opt/mcr/v81/sys/java/jre/glnxa64/jre/lib/amd64
+
+
 
 # Define default command
 CMD ["bash"]
