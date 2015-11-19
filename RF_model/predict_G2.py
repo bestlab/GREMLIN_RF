@@ -7,9 +7,7 @@ from src.utils import generate_feature_vectors
 import src.utils as utils
 
 clf_dir = 'clf'
-debug_cutoff = 10**10
 MP_CORES = 20
-
 kernel_window = 2
 
 def compute_predictions(pdb,clf):

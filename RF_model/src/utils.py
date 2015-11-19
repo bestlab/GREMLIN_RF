@@ -163,6 +163,10 @@ def load_GREMLIN_dataset(pdb):
     f_GREMLIN = os.path.join("APC",pdb+'.gremlin')
     return np.loadtxt(f_GREMLIN)
 
+def load_improved_GREMLIN_dataset(pdb):
+    f_GREMLIN = os.path.join("G2",pdb+'.g2.gremlin')
+    return np.loadtxt(f_GREMLIN)
+
 def load_seq(pdb):
     f_fasta = os.path.join("fasta",pdb+'.fasta')
     with open(f_fasta) as FIN:
