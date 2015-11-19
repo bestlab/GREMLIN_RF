@@ -11,7 +11,7 @@ from src.utils import generate_feature_vectors
 parser = argparse.ArgumentParser()
 parser.add_argument("-w", "--kernel_window",type=int,required=True)
 parser.add_argument("-n", "--n_estimators", type=int,required=True)
-parser.add_argument("-r", "--ratio_TP_to_FP", type=int,required=True)
+parser.add_argument("-r", "--ratio_TP_to_TN", type=int,required=True)
 parser.add_argument("-k", "--k_folds", type=int,default=4)
 args = parser.parse_args()
 
@@ -19,13 +19,13 @@ k_fold_n = args.k_folds
 kernel_window = args.kernel_window
 n_estimators = args.n_estimators
 clf_name =  Classifier.__name__
-ratio_TP_to_FP = args.ratio_TP_to_FP
+ratio_TP_to_TN = args.ratio_TP_to_TN
 
 nodesize = 2
-#debug_cutoff = 10**10
-debug_cutoff = 10
+debug_cutoff = 10**10
+#debug_cutoff = 10
 
-MP_CORES = 20
+MP_CORES = 25
 
 #######################################################################
 
@@ -85,7 +85,7 @@ def load_image_data(pdb,load_all=False):
     if load_all:
         FP_choosen = len(idx_true_neg)
     else:
-        FP_choosen = int(ratio_TP_to_FP*len(idx_true_pos))
+        FP_choosen = int(ratio_TP_to_TN*len(idx_true_pos))
         
     ratio = float(len(idx_true_neg))/ len(idx_true_pos)
 
@@ -115,14 +115,77 @@ def load_fold_dataset(PDB_LIST, load_all=False):
     func = load_image_data
     if load_all: func = load_all_image_data
 
-    ITR = itertools.imap(func, PDB_LIST)
-    #ITR = P.imap(func, PDB_LIST)
+    #ITR = itertools.imap(func, PDB_LIST)
+    ITR = P.imap(func, PDB_LIST)
     
     for x,y in ITR:
         X.append(x)
         Y.append(y)
 
     return np.vstack(X), np.hstack(Y)
+
+def train_model(stats, X_train, Y_train, X_test=None, Y_test=None):
+        
+    print "Training ExtraTrees classifier"
+    clf = Classifier(n_estimators=n_estimators,n_jobs=30,
+                     min_samples_leaf=nodesize,
+                     #class_weight='balanced_subsample',
+                     )
+    clf.fit(X_train,Y_train)
+    stats["train_acc"] = clf.score(X_train, Y_train)
+
+    print "Training complete"
+    print 'Training Accuracy: %.3f'%stats["train_acc"]
+    
+    # Breakout early if no test set is given
+    if X_test is None:
+        return clf, stats
+
+    stats["test_acc"] = clf.score(X_test, Y_test)
+    print 'Testing Accuracy: %.3f'%stats["test_acc"]
+
+    X_test_TP = X_test[Y_test==1]
+    Y_test_TP = Y_test[Y_test==1]
+    stats["test_acc_TP"] = clf.score(X_test_TP, Y_test_TP)
+    print 'Testing Accuracy TP: %.3f'%stats["test_acc_TP"]
+
+    X_test_FP = X_test[Y_test==0]
+    Y_test_FP = Y_test[Y_test==0]
+    stats["test_acc_FP"] = clf.score(X_test_FP, Y_test_FP)
+    print 'Testing Accuracy FP: %.3f'%stats["test_acc_FP"]
+        
+    pred_probas = clf.predict_proba(X_test)[:,1]
+    Y_predict = clf.predict(X_test)
+    
+    total_contacts = Y_test.sum()
+    predicted_contacts = Y_predict[Y_test==1].sum()
+    print 'Total contacts predicted %i/%i'%(predicted_contacts,total_contacts)
+
+    fpr,tpr,_ = roc_curve(Y_test, pred_probas)
+    stats["ROC_AUC"] = auc(fpr,tpr)
+    print "ROC area under the curve", stats["ROC_AUC"]
+
+    return clf, stats
+
+def generate_clf_f_name(stats):
+    stats["f_name"] = ("{clf_name}_{n_estimators}_window_{kernel_window}_" +
+                       "kfold_{k_fold}_ratio_{ratio_TP_to_TN}").format(**stats)
+    stats["clf_dir"] = os.path.join("clf",stats["f_name"]).format(**stats)
+    stats["f_clf"] = os.path.join(stats["clf_dir"], "model.clf")
+    return stats
+
+def save_model(stats,clf):
+    
+    # Save the model
+    os.system("rm -rf {clf_dir}; mkdir {clf_dir}".format(**stats))
+    joblib.dump(clf, stats["f_clf"])
+
+    # Save the params
+    f_json = os.path.join("clf","stats_"+stats["f_name"]+".json")
+    with open(f_json,'w') as FOUT:
+        js = json.dumps(stats,indent=2)
+        FOUT.write(js)
+
 
 
 # Load the GREMLIN data files
@@ -133,7 +196,7 @@ PDB = np.array([os.path.basename(f).split('.')[0] for f in F_GREMLIN])
 PDB = PDB[:debug_cutoff]
 
 # Multiprocessing Pool
-# P = multiprocessing.Pool(MP_CORES)
+P = multiprocessing.Pool(MP_CORES)
 
 # Remove a few bad proteins (removed for now)
 # PDB = np.array([pdb for pdb in PDB if pdb not in bad_protein_list])
@@ -164,81 +227,55 @@ for k_fold in range(k_fold_n):
         "clf_name":clf_name,
         "test_pdb":fold["test"].tolist(),
         "train_pdb":fold["train"].tolist(),
-        "ratio_TP_to_FP":ratio_TP_to_FP,
+        "ratio_TP_to_TN":ratio_TP_to_TN,
         "nodesize" : nodesize,
     }
-    print fold["test"]
 
+    stats = generate_clf_f_name(stats)
 
-    f_name = ("{clf_name}_{n_estimators}_window_{kernel_window}_" +
-              "kfold_{k_fold}_ratio_{ratio_TP_to_FP}")
-    f_name = f_name.format(**stats)
-    clf_dir = os.path.join("clf",f_name)
-    clf_dir = clf_dir.format(**stats)
-    f_clf = os.path.join(clf_dir, "model.clf")
-
-    if os.path.exists(f_clf):
-        print f_clf, "already computed! Skipping"
+    if os.path.exists(stats["f_clf"]):
+        print stats["f_clf"], "already computed! Skipping"
         continue
-    
+
     # Load training dataset
     X_train,Y_train = load_fold_dataset(fold["train"])
-
-    print "Training ExtraTrees classifier"
-    clf = Classifier(n_estimators=n_estimators,n_jobs=30,
-                     min_samples_leaf=nodesize,
-                     #class_weight='balanced',
-                     #class_weight='balanced_subsample',
-                     )
-                     #class_weight='subsample')
-                     #class_weight="auto") # ExtraTrees
-    clf.fit(X_train,Y_train)
-    stats["train_acc"] = clf.score(X_train, Y_train)
-
-    print "Training complete"
-    print 'Training Accuracy: %.3f'%stats["train_acc"]
-    
-    del X_train, Y_train
-    gc.collect()
 
     # For testing, now load the entire dataset!
     X_test,Y_test = load_fold_dataset(fold["test"],load_all=True)
 
-    stats["test_acc"] = clf.score(X_test, Y_test)
-    print 'Testing Accuracy: %.3f'%stats["test_acc"]
+    clf, stats = train_model(stats, X_train, Y_train, X_test, Y_test)
+    save_model(stats,clf)
 
-    X_test_TP = X_test[Y_test==1]
-    Y_test_TP = Y_test[Y_test==1]
-    stats["test_acc_TP"] = clf.score(X_test_TP, Y_test_TP)
-    print 'Testing Accuracy TP: %.3f'%stats["test_acc_TP"]
-
-    X_test_FP = X_test[Y_test==0]
-    Y_test_FP = Y_test[Y_test==0]
-    stats["test_acc_FP"] = clf.score(X_test_FP, Y_test_FP)
-    print 'Testing Accuracy FP: %.3f'%stats["test_acc_FP"]
-        
-    pred_probas = clf.predict_proba(X_test)[:,1]
-    Y_predict = clf.predict(X_test)
-    
-    total_contacts = Y_test.sum()
-    predicted_contacts = Y_predict[Y_test==1].sum()
-    print 'Total contacts predicted %i/%i'%(predicted_contacts,total_contacts)
-
-    fpr,tpr,_ = roc_curve(Y_test, pred_probas)
-    stats["ROC_AUC"] = auc(fpr,tpr)
-    print "ROC area under the curve", stats["ROC_AUC"]
-
-    # Save the model
-    os.system("rm -rf {dir}; mkdir {dir}".format(dir=clf_dir))
-    joblib.dump(clf, f_clf)
-
-    stats["f_clf"] = f_clf
-
-    # Save the params
-    f_json = os.path.join("clf","stats_"+f_name+".json")
-    with open(f_json,'w') as FOUT:
-        js = json.dumps(stats,indent=2)
-        FOUT.write(js)
-
-    del X_test, Y_test, clf
+    del clf
     gc.collect()
+
+############################################################################\
+# Load a best-fit model using all proteins
+############################################################################
+
+print "Starting best-fit model"
+
+stats = {
+    "k_fold_n": 1,
+    "k_fold"  : 0,
+    "kernel_window":kernel_window,
+    "n_estimators":n_estimators,
+    "clf_name":"GlobalFit",
+    "test_pdb":[],
+    "train_pdb":PDB.tolist(),
+    "ratio_TP_to_TN":ratio_TP_to_TN,
+    "nodesize" : nodesize,
+}
+
+stats = generate_clf_f_name(stats)
+
+if os.path.exists(stats["f_clf"]):
+    print stats["f_clf"], "already computed! Finished!"
+    exit()
+
+# Load training dataset
+X_train,Y_train = load_fold_dataset(PDB)
+
+clf, stats = train_model(stats, X_train, Y_train)
+
+save_model(stats,clf)
