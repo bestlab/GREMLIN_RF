@@ -27,7 +27,7 @@ def build_constraint_text(pdb, f_prediction):
         
         fade = {"res1":i+index_offset,
                 "res2":j+index_offset,
-                "score":15.0}
+                "score":-15.0}
         
         fade["atom1"] = choose_atom(atom_i)
         fade["atom2"] = choose_atom(atom_j)
