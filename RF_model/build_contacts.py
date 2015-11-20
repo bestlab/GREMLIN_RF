@@ -51,7 +51,7 @@ for pdb in PDB:
     contacts = sidx3[:total_contacts]
 
     args["model"] = "exact"
-    args["L"] = total_contacts/float(N)
+    args["L"] = 1
     np.savetxt(f_save.format(**args), contacts,fmt="%d")
 
     print "Saved predictions for", pdb

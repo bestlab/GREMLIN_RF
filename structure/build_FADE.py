@@ -2,6 +2,7 @@ import glob, os, itertools
 import numpy as np
 import src.utils as utils
 
+# Need because ROSETTA has an index offset of one
 index_offset = 1
 
 def choose_atom(res_name):
@@ -16,13 +17,13 @@ FADE_line = ('AtomPair {atom1:s} {res1:d} {atom2:s} {res2:d} '
 
 def build_constraint_text(pdb, f_prediction):
     IDX = np.loadtxt(f_prediction).astype(int)
-    fasta,seq = utils.load_seq(pdb)
+    fasta,_ = utils.load_seq(pdb)
     constraint_text = []
     
     for i,j in IDX:
 
-        atom_i = seq[i]
-        atom_j = seq[j]
+        atom_i = fasta[i]
+        atom_j = fasta[j]
         
         fade = {"res1":i+index_offset,
                 "res2":j+index_offset,
@@ -48,7 +49,7 @@ def process_pdb(pdb):
 
 os.system('mkdir -p FADE')
 
-F_PRED = glob.glob("predictions/*.txt")
+F_PRED = sorted(glob.glob("predictions/*.txt"))
 PDB = set([os.path.basename(f).split('_')[0]
            for f in F_PRED])
 

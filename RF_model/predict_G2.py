@@ -5,6 +5,7 @@ from src.utils import APC_L2, generate_matrix_IDX
 from src.utils import load_dataset_lookup
 from src.utils import generate_feature_vectors
 import src.utils as utils
+from sklearn.externals import joblib
 
 clf_dir = 'clf'
 MP_CORES = 20

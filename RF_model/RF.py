@@ -26,9 +26,12 @@ nodesize = 2
 debug_cutoff = 10**10
 #debug_cutoff = 10
 
-MP_CORES = 25
+MP_CORES = 30
 
 #######################################################################
+
+def load_all_image_data(pdb):
+    return load_image_data(pdb,load_all=True)
 
 def load_image_data(pdb,load_all=False):
 
