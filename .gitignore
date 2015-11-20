@@ -12,6 +12,10 @@ coevol/output_GREMLIN/*
 RF_model/clf/*
 RF_model/G2/*
 
-
-# Files for building parallel commands
+# Files for building parallel commansd
 structure/swarm_folding.sh
+
+# Files for folding (large and can't commit)
+structure/fragments/*
+structure/rosetta_folding_data/*
+structure/FADE/*
