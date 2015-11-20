@@ -2,8 +2,6 @@
 
 *~
 \#*
-structure/swarm_folding.sh
-
 
 # Python files
 *.pyc
@@ -12,3 +10,8 @@ structure/swarm_folding.sh
 coevol/input_GREMLIN/*
 coevol/output_GREMLIN/*
 RF_model/clf/*
+RF_model/G2/*
+
+
+# Files for building parallel commands
+structure/swarm_folding.sh
