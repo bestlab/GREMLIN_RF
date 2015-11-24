@@ -26,6 +26,10 @@ def compute_predictions(pdb,clf):
 
     IDX = generate_matrix_IDX(N,kernel_window)
 
+    # Load the native contacts
+    #NATIVE_MATRIX = utils.load_contact_map(pdb)
+    #native = [NATIVE_MATRIX[idx] for idx in IDX]
+
     #################################################################
 
     X = generate_feature_vectors(g,seq,IDX,kernel_window)
@@ -57,10 +61,10 @@ def compute_and_save_prediction((pdb,f_clf)):
     global CLF_DIR
     
     f_save = os.path.join('G2',pdb+'.g2.gremlin')
-    
+
     if os.path.exists(f_save):
         print "Already computed", pdb
-        return pdb
+        #return pdb
     
     if f_clf not in CLF_DIR:
         # Unload other models

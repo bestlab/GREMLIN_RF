@@ -2,11 +2,10 @@ import glob, os, itertools
 import pandas as pd
 
 #local_dir = os.getcwd()
-# Use less cores or system will top out
-CPU_CORES = 10
+CPU_CORES = 30
 
 os.system("mkdir -p clusters")
-os.system("mkdir -p clusters/clustered_outfiles")
+os.system("mkdir -p clusters/combined")
 
 def project_iterator():
 
@@ -35,20 +34,20 @@ def project_iterator():
 def cluster_project((pdb,model_type,L,filelist)):
     
     f_name = "{}_{}_{}".format(pdb,model_type,L)
+
     f_out = "clusters/combined/" + f_name + '.out'
     
-    cmd = ("./cluster.linuxgccrelease "
-           "-in:file:silent {f_combined} "
-           "-out:file:silent {f_cluster} "
-           "-sort_groups_by_energy true "
-           "-limit_cluster_size 20")
+    cmd = (
+        './combine_silent.linuxgccrelease '
+        '-in:file:silent {} '
+        '-out:file:silent {} '
+        '-silent_renumber true '
+    )
 
-    f_cluster = "clusters/clustered_outfiles/" + f_name + '.out'
-    cmd = cmd.format(f_cluster=f_cluster,f_combined=f_out)
+    print "Concatenating", f_out
+    os.system(cmd.format(' '.join(filelist), f_out))
 
-    os.system(cmd)
-
-    return cmd
+    return f_out
 
 INPUT_ITR = project_iterator()
 ITR = itertools.imap(cluster_project, INPUT_ITR)

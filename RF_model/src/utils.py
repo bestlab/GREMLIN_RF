@@ -86,7 +86,8 @@ def generate_feature_vectors(G,seq,IDX,kernel_window):
 
 def compute_conf(Y,native, IDX_CLOSE=None):
     '''
-    Computes the confusion matrix for a given prediction and the native state.
+    Computes the confusion matrix for a given prediction
+    and the native state.
     '''
     
     TP = ((native==1)&(Y==1)).sum()
@@ -121,7 +122,8 @@ def fixedL_cut(W,native,cut_idx):
     return compute_conf(W2,native)
     
 
-def load_dataset_lookup(clf_dir, bad_protein_list=[],debug_cutoff=10**10):
+def load_dataset_lookup(clf_dir, bad_protein_list=[],
+                        debug_cutoff=10**10):
     '''
     Loads the list of proteins and their corresponding clf files.
     Useful since the models are stored into separate files for the folds.
