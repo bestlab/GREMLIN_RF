@@ -6,8 +6,11 @@ from glob import glob
 os.system('mkdir -p tmscores')
 
 def PDB_ITR():
-    for pdb_dir in os.listdir('pdb'):
-        for f_pdb in glob(os.path.join("pdb", pdb_dir, "*.pdb")):
+    PDB_DIRS = sorted(os.listdir('pdb'))
+    for pdb_dir in PDB_DIRS:
+        os.system('mkdir -p tmscores/{}'.format(pdb_dir))
+        FILES = glob(os.path.join("pdb", pdb_dir, "*.pdb"))
+        for f_pdb in sorted(FILES):
             yield f_pdb
 
 
@@ -16,8 +19,9 @@ def process(f_pdb):
     name = f_pdb.split('/')[1]
     pdb  = name.split('_')[0]
 
-    f_out = name + '_' +os.path.basename(f_pdb).replace('.pdb.pdb','.tmscore')
-    f_out = os.path.join("tmscores",f_out)
+    f_out = os.path.basename(f_pdb).replace('.pdb','.tmscore')    
+    f_out = os.path.join("tmscores",name,f_out)
+    
     if os.path.exists(f_out):
         return None
 
@@ -30,7 +34,7 @@ def process(f_pdb):
 
     return f_out
 
-#ITR = itertools.imap(process, PDB_ITR())
+ITR = itertools.imap(process, PDB_ITR())
 P = multiprocessing.Pool()
 ITR = P.imap(process, PDB_ITR(), chunksize=20)
 

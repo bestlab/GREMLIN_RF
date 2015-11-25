@@ -1,22 +1,11 @@
-'''
-from __future__ import division
-import h5py, itertools, os, json, gc, glob, argparse
-import numpy as np
-from src.utils import compute_conf, load_dataset_lookup
-'''
 from src.utils import fixedL_cut
 from src.utils import generate_matrix_IDX
-from sklearn.externals import joblib
 import numpy as np
 import pandas as pd
 import itertools,os,glob
 import src.utils as utils
-#from src.utils import APC_L2, generate_matrix_IDX
-from src.utils import load_dataset_lookup
-from src.utils import generate_feature_vectors
 
 kernel_window = 2
-MP_CORES = 10
 
 #############################
 
@@ -47,8 +36,6 @@ def compute_rank(f_rank):
     print "Sorting score", pdb, model_name
 
     CUT_IDX = range(1,len(g))
-
-    CUT_IDX = range(1,10)
     
     data = []
     for cut_idx in CUT_IDX:  
@@ -70,10 +57,8 @@ def model_iterator(model_names):
 MODELS = ["G2","APC"]
 func = compute_rank
 
-
-
 import multiprocessing
-P = multiprocessing.Pool(MP_CORES)
+P = multiprocessing.Pool()
 
 ITR = itertools.imap(func, model_iterator(MODELS))
 ITR = P.imap(func, model_iterator(MODELS))
