@@ -4,6 +4,7 @@ import src.utils as utils
 
 # Need because ROSETTA has an index offset of one
 index_offset = 1
+FADE_strength = -10.0
 
 def choose_atom(res_name):
     if res_name == "GLY":
@@ -27,7 +28,7 @@ def build_constraint_text(pdb, f_prediction):
         
         fade = {"res1":i+index_offset,
                 "res2":j+index_offset,
-                "score":-15.0}
+                "score":FADE_strength}
         
         fade["atom1"] = choose_atom(atom_i)
         fade["atom2"] = choose_atom(atom_j)

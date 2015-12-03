@@ -19,3 +19,6 @@ structure/swarm_folding.sh
 structure/fragments/*
 structure/rosetta_folding_data/*
 structure/FADE/*
+
+# Database files
+*.db

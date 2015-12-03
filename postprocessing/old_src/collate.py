@@ -25,12 +25,27 @@ CREATE TABLE IF NOT EXISTS tmscore (
 '''
 conn.executescript(template)
 
+#pdb_filter = "1vfy"
+
+
+def TM_score_iterator():
+    TM_DIRS = sorted(os.listdir('tmscores'))
+
+    for tmdir in TM_DIRS:
+        #if pdb_filter in tmdir:
+        if True:
+            FILES = sorted(glob.glob(os.path.join('tmscores',tmdir,'*')))
+            for f in FILES:
+                yield f
 
 
 F_CLUSTERS = glob.glob("clusters/clustered_outfiles/*.out")
 ROSETTA_SCORE = {}
 for f in F_CLUSTERS:
+
+    #if pdb_filter not in f: continue
     print "Loading", f
+    
     with open(f) as FIN:
         for line in FIN:
             if "SCORE:" in line:
@@ -51,8 +66,6 @@ for f in F_CLUSTERS:
                 key = (pdb, name, cluster_id, cluster_model_id)
                 ROSETTA_SCORE[key] = score
 
-F_TM = sorted(glob.glob("tmscores/*"))
-
 def find_line(word, lines):
     for line in lines:
         if word in line:
@@ -64,10 +77,14 @@ def read_TM(f_tm):
         raw = FIN.read()
     lines = raw.split('\n')
 
-    name = os.path.basename(f_tm).split('.tmscore')[0]
+    #name = os.path.basename(f_tm).split('.tmscore')[0]
+
+    #name = '_'.join(name.split('_')[1:-1])
+    name = os.path.dirname(f_tm).split('/')[-1]
     pdb = name.split('_')[0]
-    structure_idx = '.'.join(name.split('_')[-1].split('.')[1:])
-    name = '_'.join(name.split('_')[1:-1])
+    #structure_idx = '.'.join(name.split('_')[-1].split('.')[1:])
+    name = '_'.join(name.split('_')[1:])
+    
     
     data = {
         "name" : name,
@@ -84,13 +101,18 @@ def read_TM(f_tm):
             "TMscore" : float(find_line("TM-score  ",lines)[2]),
         })
     except:
-        pass #print "problem with", f_tm
+        pass
+        print "problem with", f_tm
 
-    cluster_text = '.'.join(os.path.basename(f_tm).split('.')[2:4])
-    cluster_model_id,cluster_id  = map(int,cluster_text.split('.'))    
+
+    #cluster_text = '.'.join(os.path.basename(f_tm).split('.')[2:4])
+    #cluster_model_id,cluster_id  = map(int,cluster_text.split('.'))
+    cluster_model_id = 1
+    cluster_model = 1
     
     key = (pdb, name, cluster_id, cluster_model_id)
-    data["rosetta_score"] = float(ROSETTA_SCORE[key])
+    #data["rosetta_score"] = float(ROSETTA_SCORE[key])
+    data["rosetta_score"] = 0
 
     data["cluster_id"] = cluster_id
     data["cluster_model_id"] = cluster_model_id
@@ -105,17 +127,17 @@ cmd_insert = '''
 INSERT INTO tmscore ({}) VALUES ({})
 '''.format(','.join(keys), ','.join(['?']*len(keys)))
 
-
+F_TM = TM_score_iterator()
 ITR = itertools.imap(read_TM, F_TM)
 #P = multiprocessing.Pool()
 #ITR = P.imap(read_TM, F_TM)
 
 
 for data in ITR:
-    #try:
-    item = [data[k] for k  in keys]
-    conn.execute(cmd_insert,item)
-    #except:
-    #print "Error with", data["f_tm"]
+    try:
+        item = [data[k] for k  in keys]
+        conn.execute(cmd_insert,item)
+    except:
+        print "Error with", data["f_tm"]
 
 conn.commit()
