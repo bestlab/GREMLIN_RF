@@ -54,26 +54,28 @@ def model_iterator(model_names):
         for f in sorted(FILES):
             yield f
 
-MODELS = ["G2","APC"]
-func = compute_rank
+if __name__ == "__main__":
 
-import multiprocessing
-P = multiprocessing.Pool()
+    MODELS = ["G2","APC"]
+    func = compute_rank
 
-ITR = itertools.imap(func, model_iterator(MODELS))
-ITR = P.imap(func, model_iterator(MODELS))
+    import multiprocessing
+    P = multiprocessing.Pool()
 
-for item in ITR:
+    ITR = itertools.imap(func, model_iterator(MODELS))
+    ITR = P.imap(func, model_iterator(MODELS))
 
-    pdb, model_name, df = item
+    for item in ITR:
 
-    line = ("{} {sensitivity:0.8f} {precision:0.8f} " +
-            "{specificity:0.8f} {negative_predictive_value:0.8f}\n")
-    
-    f_save = os.path.join('stats',model_name,pdb+'.txt')
-    with open(f_save,'w') as FOUT:
-        for row in df.T:
-            values = df.ix[row]
-            s = line.format(row,**values)
-            FOUT.write(s)
+        pdb, model_name, df = item
+
+        line = ("{} {sensitivity:0.8f} {precision:0.8f} " +
+                "{specificity:0.8f} {negative_predictive_value:0.8f}\n")
+
+        f_save = os.path.join('stats',model_name,pdb+'.txt')
+        with open(f_save,'w') as FOUT:
+            for row in df.T:
+                values = df.ix[row]
+                s = line.format(row,**values)
+                FOUT.write(s)
 
