@@ -39,12 +39,12 @@ plt = sns.plt
 
 for k,row in enumerate(data):
     x,y = row.T
-    y /= y.max()
-    plt.plot(x,y,alpha=0.05,color='k')
+    y /= y[0]
+    plt.plot(x,y,alpha=0.5,color='k')
 
 plt.title("Radius of gyration for all proteins/contact maps")   
 plt.xlabel('ps')
-plt.ylabel('rg/rg max')
+plt.ylabel('rg/rg(t=0)')
 plt.tight_layout()
 plt.savefig("figures/rg_sample.png")
 plt.show()

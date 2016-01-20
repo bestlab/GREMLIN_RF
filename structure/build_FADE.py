@@ -4,7 +4,7 @@ import src.utils as utils
 
 # Need because ROSETTA has an index offset of one
 index_offset = 1
-FADE_strength = -10.0
+FADE_strength = -5.0
 
 def choose_atom(res_name):
     if res_name == "GLY":

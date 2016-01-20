@@ -2,7 +2,9 @@ import glob, os
 import itertools, multiprocessing, subprocess
 import tqdm
 
-_PARALLEL = True
+# echo 0 | trjconv -f traj.xtc -o movie.pdb && pymol movie.pdb
+
+_PARALLEL = 1
 MP_CORES = 28
 D_SYSTEMS = sorted(glob.glob("systems/*"))
 
@@ -14,7 +16,6 @@ def run_system(dir):
     
     cmd = ("cd {}; mdrun -table ../../energy_table/TABLE.xvg -s topol.tpr")
     cmd = cmd.format(dir)
-    
     with open(os.devnull, 'w') as shutup:
         subprocess.check_call(cmd, stdout=shutup,stderr=shutup, shell=True)
 

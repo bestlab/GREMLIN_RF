@@ -103,7 +103,7 @@ def compute_conf(Y,native, IDX_CLOSE=None):
 
     return conf
 
-def fixedL_cut(W,native,cut_idx):
+def fixedL_cut(W,native,cut_idx,index_only=False):
     '''
     Intermediate step when computing the confusion matrix. Given a fixed
     cut index (say the Nth top ranked score), this will find all matching
@@ -118,6 +118,9 @@ def fixedL_cut(W,native,cut_idx):
 
     W2 = np.zeros(W.shape)
     W2[W>=cutoff] = 1
+
+    if index_only:
+        return W2
 
     return compute_conf(W2,native)
     

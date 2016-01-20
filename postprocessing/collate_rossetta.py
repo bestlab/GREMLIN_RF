@@ -37,10 +37,10 @@ def file_iterator():
 
 import itertools, multiprocessing
 
-ITR = itertools.imap(process_model, file_iterator())
+#ITR = itertools.imap(process_model, file_iterator())
 
-#P = multiprocessing.Pool()
-#ITR = P.imap(process_model, file_iterator())
+P = multiprocessing.Pool()
+ITR = P.imap(process_model, file_iterator())
 
 MASTER_DF = list(ITR)
 

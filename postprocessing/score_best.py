@@ -65,7 +65,7 @@ def process_model(data):
 
     min_val = data["score"].min()
 
-    X = data["score"] - data["atom_pair_constraint"]
+    X = data["score"] #- data["atom_pair_constraint"]
     min_val = X.min()
     
     p = data[X==min_val].values[0]

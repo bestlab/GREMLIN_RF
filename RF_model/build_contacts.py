@@ -3,7 +3,7 @@ import src.utils as utils
 import numpy as np
 
 # Fixed L cutoffs to determine the predictions
-L_SET = [0.5, 1.0, 1.5]
+L_SET = [0.5, 1.0, 1.5, 3.0, 3.5]
 
 known_models = glob.glob("G2/*.gremlin")
 PDB = [os.path.basename(f).split('.')[0] for f in known_models]

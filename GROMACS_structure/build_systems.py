@@ -1,8 +1,14 @@
 import os, glob, itertools, random, subprocess
+import numpy as np
 import tqdm
+from Bio.PDB.Polypeptide import one_to_three
+from Bio.PDB import *
 
-contact_strength = 4.0
+contact_strength = 1337.0
 total_samples = 1
+
+_USE_EXACT_ONLY = True
+_USE_LIMITED_SUBSET = 20
 
 _PARALLEL = 1
 MP_CORES = 30
@@ -18,6 +24,45 @@ if not os.path.exists(f_energy):
     print "Building custom energy table"
     os.system('python write_tables.py 0.5 0.7 > '+f_energy)
 
+def fix_PDB(seq, f_pdb):
+    #print "Fixing CA atom labels", f_pdb    
+    seq3 = map(one_to_three, seq)
+    SEQ_ITR = iter(seq3)
+
+    output = []
+    with open(f_pdb) as FIN:
+        for line in FIN:
+
+            if "ALA" in line:
+                line = line.replace("ALA", SEQ_ITR.next())
+            output.append(line)
+
+    with open(f_pdb,'w') as FOUT:
+        FOUT.write(''.join(output))
+
+def match_PDB_coords(f_pdb1,f_pdb2):
+    parser1 = PDBParser()
+    model1  = parser1.get_structure('A',f_pdb1)
+
+    parser2 = PDBParser()
+    model2 = parser2.get_structure('A',f_pdb2)
+
+    for res1,res2 in zip(model1.get_residues(),
+                         model2.get_residues()):
+
+        assert( res1.resname == res2.resname )
+        res1["CA"].coord = res2["CA"].coord
+
+    # Center the protein
+    CA = np.array([x.coord for x in model1.get_atoms()])
+    CA -= CA.mean(axis=0)
+    for ca,atom1 in zip(CA,model1.get_atoms()):
+        atom1.coord = ca
+
+    io = PDBIO()
+    io.set_structure(model1)
+    io.save(f_pdb1)
+
 def build_system(item):
     f,seed_n = item
     
@@ -30,8 +75,8 @@ def build_system(item):
     f_sequence = os.path.join('systems',base,'sequence.dat')
     f_mdp = os.path.join('systems',base,'config.mdp')
     
-    if os.path.exists(f_contacts):
-        return f
+    #if os.path.exists(f_contacts):
+    #    return f
 
     #print "Building config file", f_mdp
     with open("md_config.mdp") as FIN, open(f_mdp,'w') as FOUT:
@@ -67,11 +112,27 @@ def build_system(item):
     with open(os.devnull, 'w') as shutup:
         subprocess.check_call(cmd, stdout=shutup,stderr=shutup, shell=True)
 
-    #print "Generating TPR file"
+    #print "Fixing input PDB"
+    fix_PDB(seq, os.path.join('systems',base,'GO.pdb'))
+    match_PDB_coords(os.path.join('systems',base,'GO.pdb'),
+                     os.path.join('pdb',pdb+'.pdb'))
+
+    #print "Fixing input gro"
+    
+
+    #print "Generating coordinate file"
     org_dir = os.getcwd()
     working_dir = os.path.join("systems",base)
     os.chdir(working_dir)
-    cmd = "grompp -f config.mdp -c GO.gro -p GO_gromacs_go.top"    
+    
+    cmd = "editconf -f {f_pdb} -o {f_gro} -box 80 80 80"
+    cmd = cmd.format(f_pdb="GO.pdb", f_gro="GO.gro")
+    
+    with open(os.devnull, 'w') as shutup:
+        subprocess.check_call(cmd,shell=True, stdout=shutup,stderr=shutup)
+        
+    #print "Generating TPR file"
+    cmd = "grompp -f config.mdp -c GO.gro -p GO_gromacs_go.top -maxwarn 2" 
 
     with open(os.devnull, 'w') as shutup:
         subprocess.check_call(cmd, stdout=shutup,stderr=shutup, shell=True)
@@ -83,9 +144,15 @@ def build_system(item):
 
 F_CONTACT_MAPS = sorted(glob.glob("predictions/*.txt"))
 SEEDS = range(total_samples)
+
+if _USE_EXACT_ONLY:
+    F_CONTACT_MAPS = [x for x in F_CONTACT_MAPS if "_exact" in x]
+
+if _USE_LIMITED_SUBSET:
+    F_CONTACT_MAPS = F_CONTACT_MAPS[:_USE_LIMITED_SUBSET]
+
     
 INPUT_ITR = list(itertools.product(F_CONTACT_MAPS, SEEDS))
-
 ITR = itertools.imap(build_system, INPUT_ITR)
 
 if _PARALLEL:

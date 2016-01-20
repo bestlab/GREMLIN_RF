@@ -22,3 +22,6 @@ structure/FADE/*
 
 # Database files
 *.db
+
+# RF_model files
+RF_model/predictions/*
