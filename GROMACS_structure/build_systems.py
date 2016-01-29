@@ -4,11 +4,11 @@ import tqdm
 from Bio.PDB.Polypeptide import one_to_three
 from Bio.PDB import *
 
-contact_strength = 1337.0
+contact_strength = 4.0
 total_samples = 1
 
-_USE_EXACT_ONLY = True
-_USE_LIMITED_SUBSET = 20
+_USE_EXACT_ONLY = False
+_USE_LIMITED_SUBSET = 0
 
 _PARALLEL = 1
 MP_CORES = 30
@@ -40,6 +40,27 @@ def fix_PDB(seq, f_pdb):
     with open(f_pdb,'w') as FOUT:
         FOUT.write(''.join(output))
 
+def check_PDB(f_pdb):
+    parser1 = PDBParser()
+    model1  = parser1.get_structure('A',f_pdb)
+
+    X = []
+    for res in model1.get_residues():
+        try:
+            atm = res["CA"].coord
+        except Exception as Ex:
+            print "Exception with CA atom", Ex, f_pdb
+            return False
+
+        X.append(atm)
+    X = np.array(X)
+    dist = [np.linalg.norm(x0-x1) for x0,x1 in zip(X,X[1:])]
+    if max(dist) > 4.5:
+        print "Gapped protein, skipping", f_pdb
+        return False
+
+    return True    
+
 def match_PDB_coords(f_pdb1,f_pdb2):
     parser1 = PDBParser()
     model1  = parser1.get_structure('A',f_pdb1)
@@ -68,7 +89,13 @@ def build_system(item):
     
     base = os.path.basename(f).rstrip('.txt')
     base = base + "_seed_{}".format(seed_n)
+
+    pdb = base.split('_')[0]
+    f_pdb = os.path.join('pdb',pdb+'.pdb')
     
+    if not check_PDB(f_pdb):
+        return f
+
     os.system('mkdir -p systems/'+base)
 
     f_contacts = os.path.join('systems',base,'contacts.dat')
@@ -93,7 +120,7 @@ def build_system(item):
             FOUT.write(s+'\n')
 
     #print "Building sequence file", f_sequence
-    pdb = base.split('_')[0]
+    
     f_fasta = os.path.join('fasta',pdb+'.fasta')
     with open(f_fasta) as FIN:
         FIN.readline()
@@ -110,15 +137,15 @@ def build_system(item):
                      f_contacts=f_contacts)
 
     with open(os.devnull, 'w') as shutup:
-        subprocess.check_call(cmd, stdout=shutup,stderr=shutup, shell=True)
+        subprocess.check_call(cmd, stdout=shutup,
+                              stderr=shutup, shell=True)
 
     #print "Fixing input PDB"
     fix_PDB(seq, os.path.join('systems',base,'GO.pdb'))
-    match_PDB_coords(os.path.join('systems',base,'GO.pdb'),
-                     os.path.join('pdb',pdb+'.pdb'))
 
-    #print "Fixing input gro"
-    
+    # Uncomment if you want to start with native structure
+    #match_PDB_coords(os.path.join('systems',base,'GO.pdb'),
+    #                 os.path.join('pdb',pdb+'.pdb'))
 
     #print "Generating coordinate file"
     org_dir = os.getcwd()
@@ -129,7 +156,8 @@ def build_system(item):
     cmd = cmd.format(f_pdb="GO.pdb", f_gro="GO.gro")
     
     with open(os.devnull, 'w') as shutup:
-        subprocess.check_call(cmd,shell=True, stdout=shutup,stderr=shutup)
+        subprocess.check_call(cmd,shell=True,
+                              stdout=shutup,stderr=shutup)
         
     #print "Generating TPR file"
     cmd = "grompp -f config.mdp -c GO.gro -p GO_gromacs_go.top -maxwarn 2" 

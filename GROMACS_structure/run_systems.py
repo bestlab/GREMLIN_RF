@@ -16,8 +16,14 @@ def run_system(dir):
     
     cmd = ("cd {}; mdrun -table ../../energy_table/TABLE.xvg -s topol.tpr")
     cmd = cmd.format(dir)
-    with open(os.devnull, 'w') as shutup:
-        subprocess.check_call(cmd, stdout=shutup,stderr=shutup, shell=True)
+    try:
+        with open(os.devnull, 'w') as shutup:
+            subprocess.check_call(cmd,
+                                  stdout=shutup,
+                                  stderr=shutup, shell=True)
+    except Exception as Ex:
+        print "FAILED ON ", dir, Ex
+        os.remove(f_traj)
 
     return dir
 

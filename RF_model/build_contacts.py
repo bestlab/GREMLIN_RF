@@ -5,7 +5,7 @@ import numpy as np
 # Fixed L cutoffs to determine the predictions
 L_SET = [0.5, 1.0, 1.5, 3.0, 3.5]
 
-known_models = glob.glob("G2/*.gremlin")
+known_models = sorted(glob.glob("G2/*.gremlin"))
 PDB = [os.path.basename(f).split('.')[0] for f in known_models]
 kernel_window = 2
 
@@ -36,13 +36,22 @@ for pdb in PDB:
         args["L"] = L
         cut_idx = int(N*args["L"])
         contacts = sidx1[:cut_idx]
+
+        upper_diag_contacts = np.array([contacts[:,1],contacts[:,0]]).T
+        contacts = np.vstack([contacts, upper_diag_contacts])
+        
         np.savetxt(f_save.format(**args), contacts,fmt="%d")
+
 
     args["model"] = "RF"
     for L in L_SET:
         args["L"] = L
         cut_idx = int(N*args["L"])
         contacts = sidx2[:cut_idx]
+
+        upper_diag_contacts = np.array([contacts[:,1],contacts[:,0]]).T
+        contacts = np.vstack([contacts, upper_diag_contacts])
+        
         np.savetxt(f_save.format(**args), contacts,fmt="%d")
 
     # Save an exact model for a lower bound
@@ -50,8 +59,12 @@ for pdb in PDB:
     total_contacts = sum([NATIVE[i,j] for i,j in sidx3])
     contacts = sidx3[:total_contacts]
 
+    upper_diag_contacts = np.array([contacts[:,1],contacts[:,0]]).T
+    contacts = np.vstack([contacts, upper_diag_contacts])
+
     args["model"] = "exact"
     args["L"] = 1
+    
     np.savetxt(f_save.format(**args), contacts,fmt="%d")
 
     print "Saved predictions for", pdb
