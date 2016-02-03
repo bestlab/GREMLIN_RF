@@ -93,18 +93,19 @@ def build_system(item):
     pdb = base.split('_')[0]
     f_pdb = os.path.join('pdb',pdb+'.pdb')
     
-    if not check_PDB(f_pdb):
-        return f
-
     os.system('mkdir -p systems/'+base)
 
     f_contacts = os.path.join('systems',base,'contacts.dat')
     f_sequence = os.path.join('systems',base,'sequence.dat')
     f_mdp = os.path.join('systems',base,'config.mdp')
-    
-    #if os.path.exists(f_contacts):
-    #    return f
 
+    if os.path.exists(f_mdp):
+    #    print "System already created! Skipping", f
+        return f
+
+    if not check_PDB(f_pdb):
+        return f
+    
     #print "Building config file", f_mdp
     with open("md_config.mdp") as FIN, open(f_mdp,'w') as FOUT:
         for line in FIN:
@@ -191,6 +192,9 @@ if _PARALLEL:
 
 for f in tqdm.tqdm(ITR, total=len(INPUT_ITR)):
     pass
+
+#for f in ITR:
+#    pass
 
 
 

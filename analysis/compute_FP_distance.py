@@ -15,6 +15,8 @@ cut_iterations = 500
 _PARALLEL = True
 MP_CORES = 30
 
+#_PARALLEL = False
+
 def build_cmap_from_index(N, IDX, contacts):
     C = np.zeros((N,N))
 
@@ -51,7 +53,7 @@ def compute_cmap(f_rank):
         C = build_cmap_from_index(N, IDX,contacts)
         data[cut_idx/N] = C
 
-    return data,NATIVE_MATRIX
+    return CUT_IDX,data,NATIVE_MATRIX
 
 #import pylab as plt
 #import matplotlib.pylab as plt
@@ -66,24 +68,21 @@ def compute_FP(pdb):
     f_FP = "FP_distance/{}_FP_distance.txt".format(pdb)
 
     if os.path.exists(f_FP):
-        print "f_FP exists, skipping", f_FP
+        #print "f_FP exists, skipping", f_FP
         return pdb
 
-    print "Starting", pdb
-            
     args = {"pdb" : pdb}
     f_APC = "APC/{pdb}.gremlin".format(**args)
-    f_G2  = "G2/{pdb}.gremlin".format(**args)
+    f_G2  = "G2/{pdb}.g2.gremlin".format(**args)
 
     if not os.path.exists(f_APC) or not os.path.exists(f_G2):
         print "Missing gremlin", f_APC
         return pdb
-    
 
-    C1,NATIVE = compute_cmap(f_APC)
-    C2,NATIVE = compute_cmap(f_G2)
-
+    print "Starting", pdb
     
+    X,C1,NATIVE = compute_cmap(f_APC)
+    X,C2,NATIVE = compute_cmap(f_G2)
 
     NATIVE_COORDS = np.array(np.where(NATIVE)).T
     T_NATIVE = cKDTree(NATIVE_COORDS)
@@ -111,6 +110,7 @@ if _PARALLEL:
     ITR = MP.imap(compute_FP, PDB)
 
 for pdb in ITR:
-    print "Completed", pdb
+    pass
+    #print "Completed", pdb
 
 

@@ -25,3 +25,6 @@ structure/FADE/*
 
 # RF_model files
 RF_model/predictions/*
+
+# BACKUP files
+*.bz2

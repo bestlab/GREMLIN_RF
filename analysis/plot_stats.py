@@ -12,6 +12,9 @@ reference_dir = "stats/APC"
 col1,col2 = "precision","sensitivity"
 #col1,col2 = "sensitivity","specificity"
 
+xname = "precision $TP/(TP+FP)$"
+yname = "sensitivity $TP/(TP+FN)$"
+
 glob_str = "????.txt"
 
 
@@ -27,6 +30,16 @@ bin_n = 30
 bins = np.linspace(0,1,bin_n)
 
 pdb_cutoff = 10**10
+
+def figure_options():
+    
+    plt.legend(loc=0,fontsize=18)
+    plt.xlabel(yname,fontsize=18)
+    plt.ylabel(xname,fontsize=18)
+
+    plt.xlim(0,1)
+    plt.ylim(0,1)
+
 
 def load_single_stat_file(f_txt):
     global col1, col2
@@ -117,6 +130,9 @@ plt.fill_between(STD_X, MU_Y-STD_Y, MU_Y+STD_Y,
     edgecolor=None,
     linewidth=0, antialiased=True)
 
+figure_options()
+plt.savefig("figures/GREMLIN_only_Acc_Pre.png")
+
 for n,testing_dir in enumerate(testing):
     label = testing[testing_dir]    
 
@@ -138,13 +154,7 @@ for n,testing_dir in enumerate(testing):
 
 #######################################################
 
-
-plt.legend(loc=0,fontsize=18)
-plt.xlabel(col2,fontsize=18)
-plt.ylabel(col1,fontsize=18)
-
-plt.xlim(0,1)
-plt.ylim(0,1)
-plt.savefig("figures/cmp.png")
+figure_options()
+plt.savefig("figures/GREMLIN_RF_Acc_Pre.png")
 plt.show()
 #exit()

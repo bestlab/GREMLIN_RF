@@ -4,7 +4,7 @@ import tqdm
 import numpy as np
 import MDAnalysis
 
-_PARALLEL = False
+_PARALLEL = True
 MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))
 

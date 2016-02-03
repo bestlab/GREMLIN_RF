@@ -2,10 +2,12 @@ import glob, os, subprocess, h5py
 import itertools, multiprocessing
 import tqdm
 import numpy as np
+import src.utils as utils
 
 _PARALLEL = True
 MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))
+kernel_window = 2
 
 def run_system(dir):
     
@@ -28,15 +30,29 @@ def run_system(dir):
     h5 = h5py.File(f_CMAP,'r')
     CMAP = h5["CMAP"][:]
     OC   = h5["OC"][:]
+    assert(OC.shape == CMAP[0].shape)
     h5.close()
 
-    assert(OC.shape == CMAP[0].shape)    
+    N = CMAP.shape[1]
+    IDX = utils.generate_matrix_IDX(N,kernel_window)
+    VALID_IDX = np.zeros((N,N),dtype=bool)
+    for i,j in IDX:
+        VALID_IDX[i,j] = VALID_IDX[j,i] = True
+
+    # To ignore VALID_IDX keep this line in
+    VALID_IDX = np.ones(VALID_IDX.shape)    
 
     Q = []
     for cx in CMAP:
-        q = ((cx==OC)*(OC==True)).sum()
-        q /= float(OC.sum())
+        
+        q = ((cx==OC)*(OC*VALID_IDX)).sum()
+
+        norm = float((OC*VALID_IDX).sum())
+        q /= norm
+        
         Q.append(q)
+
+    print dir, np.array(Q).mean()
 
     np.savetxt(f_Q,Q)
     os.chdir(org_dir)
@@ -54,6 +70,8 @@ if _PARALLEL:
 
 #for item in tqdm.tqdm(ITR):
 for item in ITR:
-    print "Completed", item
+    #print "Completed", item
+    pass
+
 
 

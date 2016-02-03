@@ -4,7 +4,7 @@ import tqdm
 
 # echo 0 | trjconv -f traj.xtc -o movie.pdb && pymol movie.pdb
 
-_PARALLEL = 1
+_PARALLEL = 0
 MP_CORES = 28
 D_SYSTEMS = sorted(glob.glob("systems/*"))
 
@@ -13,6 +13,8 @@ def run_system(dir):
     if os.path.exists(f_traj):
         print "SKIPPING", dir
         return dir
+    print "RUNNING", dir
+    return dir
     
     cmd = ("cd {}; mdrun -table ../../energy_table/TABLE.xvg -s topol.tpr")
     cmd = cmd.format(dir)

@@ -7,6 +7,24 @@ _PARALLEL = True
 MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))[:]
 
+
+IGNORE_SET = set(["_0.50", "_1.50", "_3.00","_1.0",])
+KEEP_SET = set(["exact","RF_5.0","GREMLIN_3.0"])
+
+D2 = []
+for x in D_SYSTEMS:
+
+    FLAGS = [y for y in KEEP_SET if y in x]
+    if not FLAGS: continue
+
+    #FLAGS = [y for y in IGNORE_SET if y in x]
+    #if FLAGS: continue
+
+    
+    D2.append(x)
+
+D_SYSTEMS = D2
+
 def run_system(dir):
     print "Loading", dir
 
@@ -18,7 +36,7 @@ def run_system(dir):
     Q = np.loadtxt(f_traj)
 
     # Keep the mean of the last 20 frames
-    Q = Q[-20:]
+    Q = Q[-100:]
 
     return pdb, system, Q.mean()
 
@@ -86,7 +104,8 @@ def zero_one_range(*args,**kwargs):
     sns.plt.text(0.50, 25.50, "{:0.3f}".format(avg),
                  fontsize=15, weight=font_weight,alpha=alpha)
 
-g = sns.pairplot(df2)
+bins = np.linspace(0.40, 1.0, 30)
+g = sns.pairplot(df2,diag_kws={"bins":bins})
 g.map_lower(ref_line)
 g.map_upper(ref_line)
 g.map_diag(zero_one_range)
@@ -95,6 +114,6 @@ g.map_diag(zero_one_range)
 #fig = matplotlib.pyplot.gcf()
 #fig.set_size_inches(3,3)
 
-sns.plt.savefig("figures/pairplot.png")
+sns.plt.savefig("figures/pairplot_Q.png")
 
 sns.plt.show()
