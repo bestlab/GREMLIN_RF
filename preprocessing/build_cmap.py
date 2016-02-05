@@ -5,6 +5,9 @@ import numpy as np
 
 _CB_residue_cutoff = 8.0
 
+# If True, always return CA distance
+_USE_CA_ONLY = True
+
 def mkdir_p(d):
     try:
         os.mkdir(d)
@@ -18,6 +21,9 @@ F_PDB = sorted(glob.glob("pdb/????.pdb"))
 
 def get_residue_pos(res, f_pdb):
     name = res.get_resname()
+
+    if _USE_CA_ONLY:
+        return res["CA"].coord
     
     # Glycine atoms use CA
     if name == "GLY":
