@@ -114,6 +114,7 @@ g.map_diag(zero_one_range)
 #fig = matplotlib.pyplot.gcf()
 #fig.set_size_inches(3,3)
 
+os.system('mkdir -p figures')
 sns.plt.savefig("figures/pairplot_Q.png")
 
 sns.plt.show()

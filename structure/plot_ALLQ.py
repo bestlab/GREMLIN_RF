@@ -65,5 +65,6 @@ plt.xlabel("cutoff",fontsize=18)
 plt.xlim(0,5.1)
 plt.ylabel("$<Q>$ for all proteins",fontsize=18)
 
+os.system("mkdir -p figures")
 plt.savefig("figures/Q_avg.png")
 plt.show()
