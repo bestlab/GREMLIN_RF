@@ -24,3 +24,8 @@ stats:
 	python compute_rg.py
 	python compute_E.py
 	python compute_RMSD.py
+
+full:
+	make build
+	make extract
+	make stats

@@ -25,7 +25,6 @@ def run_system(dir):
         os.chdir(org_dir)
         return dir
 
-
     P = MDAnalysis.Universe(f_movie, multiframe=True)
     T = P.trajectory
 

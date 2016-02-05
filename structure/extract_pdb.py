@@ -23,7 +23,7 @@ def run_system(dir):
 
     cmd = ("echo 0 0 | "
            "trjconv -f traj.xtc -o movie.pdb "
-           "-center -pbc mol -ur compact")
+           "-center -pbc mol -ur compact -conect")
 
     with open(os.devnull, 'w') as shutup:
         subprocess.check_call(cmd, stdout=shutup,stderr=shutup,

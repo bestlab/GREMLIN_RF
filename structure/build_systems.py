@@ -4,8 +4,8 @@ import tqdm
 from Bio.PDB.Polypeptide import one_to_three
 from Bio.PDB import *
 
-lower_U_rg = 0.3
-upper_U_rg = 0.5
+lower_U_rg = 0.4
+upper_U_rg = 0.7
 
 contact_strength = 4.0
 total_samples = 1

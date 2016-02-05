@@ -3,13 +3,14 @@ import itertools, multiprocessing
 import tqdm
 import numpy as np
 import src.utils as utils
-import Bio.PDB.QCPSuperimposer as QC
+#import Bio.PDB.QCPSuperimposer as QC
+from Bio.SVDSuperimposer import SVDSuperimposer 
 
-_PARALLEL = True
+_PARALLEL = False
 MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))
-kernel_window = 2
 
+_FORCE = True
 
 def run_system(dir):
 
@@ -32,7 +33,7 @@ def run_system(dir):
         os.chdir(org_dir)
         return dir
 
-    if os.path.exists(f_RMSD):
+    if os.path.exists(f_RMSD) and not _FORCE:
         print "RMSD file exists, skipping", dir
         os.chdir(org_dir)
         return dir
@@ -43,23 +44,51 @@ def run_system(dir):
     OC = np.loadtxt(f_OC)
 
     # Move the coordinates to something sensible
-    C  -= C.mean(axis=0)
-    OC -= OC.mean(axis=0)
+    #C  -= C.mean(axis=0)
+    #OC -= OC.mean(axis=0)
+
+    median_OC = np.median([np.linalg.norm(a-b)
+                           for a,b in zip(OC,OC[1:])])
+    median_C  = np.median([np.linalg.norm(a-b)
+                           for a,b in zip(C[-1],C[-1][1:])])
 
     assert(C[0].shape == OC.shape)
-
     RMSD = []
+    org_RMSD = []
 
-    Q = QC.QCPSuperimposer()    
+    sup = SVDSuperimposer()
+
     for cx in C:
-        Q.set(OC,cx)
-        Q.run()
-        val = Q.get_rms()
-        RMSD.append(val)
+        cx += OC.mean(axis=0) - cx.mean(axis=0)
+        sup.set(OC,cx)
+        sup.run()
+        RMSD.append(sup.get_rms())
+        org_RMSD.append(sup.get_init_rms())
+
+    rot, tran = sup.get_rotran()
+    cx = np.dot(cx, rot) + tran
 
     RMSD = np.array(RMSD)
-    print dir, RMSD[-20:].mean()
+    org_RMSD = np.array(org_RMSD)
+    print dir, RMSD[-20:].mean(), org_RMSD[-20:].mean()
 
+    from mpl_toolkits.mplot3d import Axes3D
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.scatter(OC[:,0],OC[:,1],OC[:,2],'b')
+    #ax.plot(OC[:,0],OC[:,1],OC[:,2],'k',alpha=0.5)
+
+    ax.scatter(cx[:,0],cx[:,1],cx[:,2],color='r')
+    #ax.plot(cx[:,0],cx[:,1],cx[:,2],'k',alpha=0.5)
+    plt.show()
+    exit()
+
+    print OC
+
+    #exit()
+    
     np.savetxt(f_RMSD,RMSD)
     os.chdir(org_dir)
 

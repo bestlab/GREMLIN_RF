@@ -8,9 +8,10 @@ _PARALLEL = True
 MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))[:]
 
-
 IGNORE_SET = set(["_0.50", "_1.50", "_3.00","_1.0",])
 KEEP_SET = set(["exact","RF_5.0","GREMLIN_3.0"])
+
+max_view_RMSD = 18
 
 D2 = []
 for x in D_SYSTEMS:
@@ -32,12 +33,12 @@ def run_system(dir):
     system = '_'.join(dir.split('/')[-1].split("_")[1:3])
     
     f_traj = os.path.join(dir,"RMSD.txt")
-    Q = np.loadtxt(f_traj)
+    RMSD = np.loadtxt(f_traj)
 
-    # Keep the mean of the last 20 frames
-    Q = Q[-200:]
+    # Keep the mean of the last 200 frames
+    RMSD = RMSD[-200:]
 
-    return pdb, system, Q.mean()
+    return pdb, system, RMSD.mean()
 
 INPUT_ITR = D_SYSTEMS
 ITR = itertools.imap(run_system, INPUT_ITR)
@@ -47,17 +48,11 @@ if _PARALLEL:
     MP = multiprocessing.Pool(MP_CORES)
     ITR = MP.imap(run_system, INPUT_ITR)
 
-cols = ['pdb','system','Q']
+cols = ['pdb','system','RMSD']
 data = list(ITR)
 df = pd.DataFrame(data=data,columns=cols)
 
-#import seaborn as sns
-#sns.barplot(x='pdb',y='Q',hue='system',data=df)
-#sns.plt.show()
-#exit()
-
 import seaborn as sns
-
 
 df2 = pd.DataFrame(
     columns = df.system.unique(),
@@ -65,7 +60,7 @@ df2 = pd.DataFrame(
 )
 
 for k,row in df.iterrows():
-    df2[row["system"]][row["pdb"]] = row.Q
+    df2[row["system"]][row["pdb"]] = row.RMSD
 
 print df2
 
@@ -87,7 +82,7 @@ def RMSD_diff(*args,**kwargs):
 def ref_line(*args,**kwargs):
     X = np.linspace(0,30,100)
     sns.plt.plot(X,X,'r--',alpha=0.8)
-    sns.plt.xlim(0,30)
+    sns.plt.xlim(0,max_view_RMSD)
     sns.plt.ylim(0,30)
     #RMSD_diff(*args,**kwargs)
 
@@ -95,14 +90,17 @@ def zero_one_range(*args,**kwargs):
 
     avg = args[0].mean()
     
-    sns.plt.xlim(0,30)
+    sns.plt.xlim(0,max_view_RMSD)
     
     font_weight = "bold"
     alpha = 1.0
     sns.plt.text(0.50, 22.50, "{:0.3f}".format(avg),
                  fontsize=15, weight=font_weight,alpha=alpha)
 
-bins = np.linspace(0, 30, 25)
+
+assert( df.RMSD.max() < max_view_RMSD )
+
+bins = np.linspace(0, max_view_RMSD, 40)
 g = sns.pairplot(df2,diag_kws={"bins":bins})
 g.map_lower(ref_line)
 g.map_upper(ref_line)
@@ -112,6 +110,7 @@ g.map_diag(zero_one_range)
 #fig = matplotlib.pyplot.gcf()
 #fig.set_size_inches(3,3)
 
+os.system('mkdir -p figures/')
 sns.plt.savefig("figures/pairplot_RMSD.png")
 
 sns.plt.show()
