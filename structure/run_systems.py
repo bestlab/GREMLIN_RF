@@ -4,8 +4,8 @@ import tqdm
 
 # echo 0 | trjconv -f traj.xtc -o movie.pdb && pymol movie.pdb
 
-_PARALLEL = 0
-MP_CORES = 28
+_PARALLEL = True
+MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))
 
 def run_system(dir):
@@ -13,11 +13,11 @@ def run_system(dir):
     if os.path.exists(f_traj):
         print "SKIPPING", dir
         return dir
-    print "RUNNING", dir
-    return dir
     
-    cmd = ("cd {}; mdrun -table ../../energy_table/TABLE.xvg -s topol.tpr")
+    cmd = ("cd {}; mdrun -table "
+           "../../energy_table/TABLE.xvg -s topol.tpr")
     cmd = cmd.format(dir)
+
     try:
         with open(os.devnull, 'w') as shutup:
             subprocess.check_call(cmd,
@@ -39,7 +39,3 @@ if _PARALLEL:
 
 for f in tqdm.tqdm(ITR, total=len(INPUT_ITR)):
     pass
-
-#for d in D_SYSTEMS:
-#    run_system(d)
-#    pass

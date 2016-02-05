@@ -4,13 +4,16 @@ import tqdm
 from Bio.PDB.Polypeptide import one_to_three
 from Bio.PDB import *
 
+lower_U_rg = 0.3
+upper_U_rg = 0.5
+
 contact_strength = 4.0
 total_samples = 1
 
-_USE_EXACT_ONLY = False
+_USE_EXACT_ONLY = True
 _USE_LIMITED_SUBSET = 0
 
-_PARALLEL = 1
+_PARALLEL = True
 MP_CORES = 30
 
 # System models are stored in here
@@ -20,9 +23,14 @@ os.system('mkdir -p systems')
 os.system('mkdir -p energy_table')
 f_energy = 'energy_table/TABLE.xvg'
 
-if not os.path.exists(f_energy):
+#if not os.path.exists(f_energy):
+
+# Always build a new energy table just in case
+if True:
     print "Building custom energy table"
-    os.system('python write_tables.py 0.5 0.7 > '+f_energy)
+    cmd = 'python write_tables.py {} {} > {}'
+    cmd = cmd.format(lower_U_rg,upper_U_rg,f_energy)
+    os.system(cmd)
 
 def fix_PDB(seq, f_pdb):
     #print "Fixing CA atom labels", f_pdb    
@@ -93,18 +101,18 @@ def build_system(item):
     pdb = base.split('_')[0]
     f_pdb = os.path.join('pdb',pdb+'.pdb')
     
-    os.system('mkdir -p systems/'+base)
-
     f_contacts = os.path.join('systems',base,'contacts.dat')
     f_sequence = os.path.join('systems',base,'sequence.dat')
     f_mdp = os.path.join('systems',base,'config.mdp')
 
     if os.path.exists(f_mdp):
-    #    print "System already created! Skipping", f
+        print "System already created! Skipping", f
         return f
 
     if not check_PDB(f_pdb):
         return f
+
+    os.system('mkdir -p systems/'+base)
     
     #print "Building config file", f_mdp
     with open("md_config.mdp") as FIN, open(f_mdp,'w') as FOUT:
