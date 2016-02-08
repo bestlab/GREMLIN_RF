@@ -12,6 +12,9 @@ os.system('mkdir -p png_cmap')
 
 kernel_window = 2
 
+top_cut_IDX = 5
+cut_IDX_samples = 5
+
 def build_cmap_from_index(N, IDX, contacts):
     C = np.zeros((N,N))
 
@@ -41,7 +44,7 @@ def compute_cmap(f_rank):
     g      = np.array([G[idx] for idx in IDX])
 
     data = {}
-    CUT_IDX = range(1,5*N,20)
+    CUT_IDX = range(1,top_cut_IDX*N,cut_IDX_samples)
     
     for cut_idx in CUT_IDX:
         contacts = fixedL_cut(g,native,cut_idx,index_only=True)
@@ -76,9 +79,9 @@ for key in sorted(C1.keys()):
     axes[1].scatter(XS,YS,alpha=0.35,color='r',s=8,edgecolor=None,marker='s')
 
     args["Lcut"] = key
-    axes[0].text(5,-2,"{pdb} GREMLIN, $L={Lcut:0.3f} N$".format(**args),
+    axes[0].text(5,-2,"{pdb} GREMLIN, $L={Lcut:0.2f} N$".format(**args),
                  fontsize=14)
-    axes[1].text(5,-2,"{pdb} Random Forest, $L={Lcut:0.3f} N$".format(**args),
+    axes[1].text(5,-2,"{pdb} Random Forest, $L={Lcut:0.2f} N$".format(**args),
                  fontsize=14)
 
 

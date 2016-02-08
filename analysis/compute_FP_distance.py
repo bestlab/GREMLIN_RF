@@ -55,10 +55,6 @@ def compute_cmap(f_rank):
 
     return CUT_IDX,data,NATIVE_MATRIX
 
-#import pylab as plt
-#import matplotlib.pylab as plt
-#import seaborn as sns
-
 os.system('mkdir -p FP_distance')
 F_CMAP = glob.glob("cmap/*.cmap")
 PDB = [os.path.basename(f).split('.')[0] for f in F_CMAP]

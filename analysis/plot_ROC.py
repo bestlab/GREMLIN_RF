@@ -9,13 +9,18 @@ plt = sns.plt
 FLAG_plot_fill = True
 reference_dir = "stats/APC"
 
-col1,col2 = "precision","sensitivity"
-#col1,col2 = "sensitivity","specificity"
+bin_n = 100
 
-xname = "precision $TP/(TP+FP)$"
-yname = "sensitivity $TP/(TP+FN)$"
+col1,col2 = "false_positive_rate","true_positive_rate",
+yname = "True Positive Rate $TP/(TP+FN)$"
+xname = "False Positive Rate $FP/(FP+TN)$"
+
+#col1,col2 = "precision","sensitivity"
+#yname = "precision $TP/(TP+FP)$"
+#xname = "sensitivity $TP/(TP+FN)$"
 
 glob_str = "????.txt"
+os.system('mkdir -p figures')
 
 
 testing = {
@@ -26,19 +31,23 @@ testing = {
 
 
 data = {}
-bin_n = 30
 bins = np.linspace(0,1,bin_n)
 
 pdb_cutoff = 10**10
 
 def figure_options():
     
-    plt.legend(loc=0,fontsize=18)
-    plt.xlabel(yname,fontsize=18)
-    plt.ylabel(xname,fontsize=18)
+    plt.legend(loc=4,fontsize=18)
+    plt.xlabel(xname,fontsize=18)
+    plt.ylabel(yname,fontsize=18)
 
     plt.xlim(0,1)
     plt.ylim(0,1)
+
+    X = np.linspace(0,1,100)
+    plt.plot(X,X,'k--',alpha=0.25)
+
+    plt.tight_layout()
 
 
 def load_single_stat_file(f_txt):
@@ -46,11 +55,12 @@ def load_single_stat_file(f_txt):
     
     #print "Loading", f_txt
     cols = ("sensitivity","precision",
-            "specificity","negative_predictive_value")
+            "specificity","negative_predictive_value",
+             "false_positive_rate", "true_positive_rate")
 
     try:
         data = np.loadtxt(f_txt)
-        df = pd.read_csv(f_txt, sep=" ",index_col=0,names=cols)
+        df = pd.DataFrame(data=data[:,1:], columns=cols)
     except ValueError:
         print "Problem with", f_txt
         return None
@@ -107,7 +117,7 @@ def load_glob(F_TXT):
             MU_Y[i]  = 0
             STD_Y[i] = 0
 
-
+    return MU_X[:-1], MU_Y[:-1], STD_X[:-1], STD_Y[:-1]
     return MU_X, MU_Y, STD_X, STD_Y
 
 
@@ -124,6 +134,8 @@ color = colors[0]
 plt.plot(MU_X,MU_Y,label="GREMLIN",
          linestyle='--',
          color=color)
+
+#plt.scatter(MU_X,MU_Y)
 
 plt.fill_between(STD_X, MU_Y-STD_Y, MU_Y+STD_Y,
     alpha=alpha, facecolor=color,
@@ -143,6 +155,7 @@ for n,testing_dir in enumerate(testing):
 
     MU_X, MU_Y, STD_X, STD_Y = load_glob(F_RF)
     plt.plot(MU_X,MU_Y,label=label,color=color)
+    #plt.scatter(MU_X,MU_Y)
 
     if not FLAG_plot_fill:
         continue
@@ -155,6 +168,7 @@ for n,testing_dir in enumerate(testing):
 #######################################################
 
 figure_options()
-plt.savefig("figures/GREMLIN_RF_Acc_Pre.png")
+plt.savefig("figures/GREMLIN_RF_ROC.png")
+plt.savefig("figures/GREMLIN_RF_ROC.pdf")
 plt.show()
 #exit()

@@ -31,7 +31,8 @@ def compute_rank(f_rank):
 
     # sorting by scores
     cols = ("sensitivity","precision",
-            "specificity","negative_predictive_value")
+            "specificity","negative_predictive_value",
+            "false_positive_rate", "true_positive_rate")
 
     print "Sorting score", pdb, model_name
 
@@ -70,7 +71,8 @@ if __name__ == "__main__":
         pdb, model_name, df = item
 
         line = ("{} {sensitivity:0.8f} {precision:0.8f} " +
-                "{specificity:0.8f} {negative_predictive_value:0.8f}\n")
+                "{specificity:0.8f} {negative_predictive_value:0.8f} "
+                "{false_positive_rate:0.8f} {true_positive_rate:0.8f}\n")
 
         f_save = os.path.join('stats',model_name,pdb+'.txt')
         with open(f_save,'w') as FOUT:
@@ -79,3 +81,4 @@ if __name__ == "__main__":
                 s = line.format(row,**values)
                 FOUT.write(s)
 
+        print "Completed", pdb, model_name
