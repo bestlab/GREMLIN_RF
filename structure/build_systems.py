@@ -5,12 +5,12 @@ from Bio.PDB.Polypeptide import one_to_three
 from Bio.PDB import *
 
 lower_U_rg = 0.4
-upper_U_rg = 0.7
+upper_U_rg = 0.6
 
 contact_strength = 4.0
 total_samples = 1
 
-_USE_EXACT_ONLY = True
+_USE_EXACT_ONLY = False
 _USE_LIMITED_SUBSET = 0
 
 _PARALLEL = True

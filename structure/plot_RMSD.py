@@ -11,7 +11,7 @@ D_SYSTEMS = sorted(glob.glob("systems/*"))[:]
 IGNORE_SET = set(["_0.50", "_1.50", "_3.00","_1.0",])
 KEEP_SET = set(["exact","RF_5.0","GREMLIN_3.0"])
 
-max_view_RMSD = 18
+cutoff_N_frames = 20
 
 D2 = []
 for x in D_SYSTEMS:
@@ -36,7 +36,7 @@ def run_system(dir):
     RMSD = np.loadtxt(f_traj)
 
     # Keep the mean of the last 200 frames
-    RMSD = RMSD[-200:]
+    RMSD = RMSD[-cutoff_N_frames:]
 
     return pdb, system, RMSD.mean()
 
@@ -98,7 +98,7 @@ def zero_one_range(*args,**kwargs):
                  fontsize=15, weight=font_weight,alpha=alpha)
 
 
-assert( df.RMSD.max() < max_view_RMSD )
+max_view_RMSD = int(df.RMSD.max()) + 1
 
 bins = np.linspace(0, max_view_RMSD, 40)
 g = sns.pairplot(df2,diag_kws={"bins":bins})

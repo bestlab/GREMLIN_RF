@@ -58,20 +58,35 @@ def run_system(dir):
 
     sup = SVDSuperimposer()
 
+    RG = []
+    OC -= OC.mean(axis=0)
+    OC_RG = ((np.linalg.norm(OC,axis=1)**2).sum()/len(OC)) ** 0.5
+
     for cx in C:
-        cx += OC.mean(axis=0) - cx.mean(axis=0)
+        cx -= cx.mean(axis=0)
+
+        rg_cx = ((np.linalg.norm(cx,axis=1)**2).sum()/len(cx)) ** 0.5
+        RG.append(rg_cx)
+        
         sup.set(OC,cx)
         sup.run()
         RMSD.append(sup.get_rms())
         org_RMSD.append(sup.get_init_rms())
+
 
     rot, tran = sup.get_rotran()
     cx = np.dot(cx, rot) + tran
 
     RMSD = np.array(RMSD)
     org_RMSD = np.array(org_RMSD)
-    print dir, RMSD[-20:].mean(), org_RMSD[-20:].mean()
+    RG = np.array(RG)
+    
+    #print dir, RMSD[-20:].mean(), org_RMSD[-20:].mean(),RG[-20:].mean()
+    print "{} {: 0.4f} {: 0.4f}".format(dir, RMSD[-20:].mean(),
+                                      RG[-20:].mean() / OC_RG)
+    
 
+    '''
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.pyplot as plt
     fig = plt.figure()
@@ -86,8 +101,8 @@ def run_system(dir):
     exit()
 
     print OC
-
     #exit()
+    '''
     
     np.savetxt(f_RMSD,RMSD)
     os.chdir(org_dir)
