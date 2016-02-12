@@ -100,6 +100,8 @@ def compute_conf(Y,native, IDX_CLOSE=None):
     conf["precision"]   = TP/(TP+FP)
     conf["specificity"] = TN/(TN+FP)
     conf["negative_predictive_value"] = TN/(TN+FN)
+    conf["false_positive_rate"] = 1 - conf["specificity"]
+    conf["true_positive_rate"]  = conf["sensitivity"]
 
     return conf
 

@@ -40,4 +40,5 @@ plt.legend(loc=2,fontsize=18)
 plt.ylim(ymin=0)
 
 plt.savefig("figures/FP_distance.png")
+plt.savefig("figures/FP_distance.pdf")
 plt.show()

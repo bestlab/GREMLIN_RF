@@ -6,7 +6,7 @@ import src.utils as utils
 #import Bio.PDB.QCPSuperimposer as QC
 from Bio.SVDSuperimposer import SVDSuperimposer 
 
-_PARALLEL = False
+_PARALLEL = True
 MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))
 
@@ -82,8 +82,8 @@ def run_system(dir):
     RG = np.array(RG)
     
     #print dir, RMSD[-20:].mean(), org_RMSD[-20:].mean(),RG[-20:].mean()
-    print "{} {: 0.4f} {: 0.4f}".format(dir, RMSD[-20:].mean(),
-                                      RG[-20:].mean() / OC_RG)
+    print "{} {: 0.4f} {: 0.4f}".format(dir, RMSD[-200:].mean(),
+                                      RG[-200:].mean() / OC_RG)
     
 
     '''

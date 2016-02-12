@@ -3,7 +3,6 @@ import itertools, multiprocessing
 import tqdm
 
 _PARALLEL = True
-_PARALLEL = False
 MP_CORES = 30
 D_SYSTEMS = sorted(glob.glob("systems/*"))
 
